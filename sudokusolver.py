@@ -12,7 +12,7 @@ class _Cell:
     is_selected: bool
     is_locked: bool
 
-    def __init__(self, val: int)-> None:
+    def __init__(self, val: int) -> None:
         self.numbers = [0]
         if val != 0:
             self.numbers.append(val)
@@ -43,6 +43,10 @@ class _Cell:
             new_cell.add_num(i)
         new_cell.is_selected = self.is_selected
         return new_cell
+
+    def clear(self):
+        self.numbers = [0]
+        self.is_selected = False
 
 
 ROW = [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -94,6 +98,8 @@ class Board:
         self.generate_grid()
 
 
+
+
     def __getitem__(self, item):
         return self.board[item]
 
@@ -105,9 +111,22 @@ class Board:
 
         for i in range(0, 9):
             for j in range(0, 9):
-                pr += ' ' + str(self[i][j].numbers[1]) + ' '
+                if len(self[i][j].numbers) == 1:
+                    pr += ' ' + str(self[i][j].numbers[0]) + ' '
+                else:
+                    pr += ' ' + str(self[i][j].numbers[1]) + ' '
+
+
+
             pr += '\n'
         return pr
+
+    def clear(self):
+        for i in range(9):
+            for j in range(9):
+                self.board[i][j].clear()
+
+
 
     def _add_num(self, row, col, num):
         self.board[row][col].add_num(num)
@@ -282,12 +301,10 @@ class Board:
         return self.counter
 
     def generate_grid(self):
-
-
+        self.clear()
         self._generator_helper(0)
-
         self.generate_puzzle(45)
-
+        #print(self)
 
     def generate_puzzle(self, num):
         self._clue_counter = 81 - num
@@ -491,35 +508,38 @@ if __name__ == '__main__':
     pygame.display.set_caption('Sudoku')
     clock = pygame.time.Clock()
 
-    def text_objects(text, font, colour):
-        textSurface = font.render(text, True, (0, 0, 0), colour)
+    def text_objects(text, font, colour1, colour2):
+        textSurface = font.render(text, True, colour1, colour2)
         return textSurface, textSurface.get_rect()
 
     def draw_buttons():
         pygame.draw.rect(gameDisplay, (0, 0, 0), [590, 100, 100, 40], 5)
-        TextSurf, TextRect = text_objects("solve", pygame.font.SysFont('arial', 20, True), (255, 255, 255))
-
+        TextSurf, TextRect = text_objects("solve", pygame.font.SysFont('arial', 20, True),(0, 0, 0), (255, 255, 255))
         TextRect.center = (640, 115)
         gameDisplay.blit(TextSurf, TextRect)
+
         pygame.draw.rect(gameDisplay, (0, 0, 0), [590, 250, 100, 60], 5)
         TextSurf, TextRect = text_objects("visual solve",
-                                          pygame.font.SysFont('arial', 20, True),
+                                          pygame.font.SysFont('arial', 20, True),(0, 0, 0),
                                           (255, 255, 255))
-
-        TextRect.center = (640, 115)
+        TextRect.center = (640, 275)
         gameDisplay.blit(TextSurf, TextRect)
+
+
         pygame.draw.rect(gameDisplay, (0, 0, 0), [590, 160, 100, 60], 5)
         TextSurf, TextRect = text_objects("Generate",
                                           pygame.font.SysFont('arial', 20,
-                                                              True),
+                                                              True),(0, 0, 0),
                                           (255, 255, 255))
-
-        TextRect.center = (640, 265)
+        TextRect.center = (640, 185)
         gameDisplay.blit(TextSurf, TextRect)
+
+
 
 
     def draw_rect(x, y):
         pygame.draw.rect(gameDisplay, (0, 0, 0), [x, y, 50, 50], 1)
+
 
 
     def draw_boundaries():
@@ -540,9 +560,10 @@ if __name__ == '__main__':
     draw_border()
 
 
-    def text_objects(text, font, colour):
-        textSurface = font.render(text, True, (0, 0, 0), colour)
+    def text_objects(text, font, colour1, colour2):
+        textSurface = font.render(text, True, colour1, colour2)
         return textSurface, textSurface.get_rect()
+
 
     # gameboard[0][0].delete_all_but_one(0)
     # print(gameboard[0][0].numbers)
@@ -557,7 +578,7 @@ if __name__ == '__main__':
             largeText = pygame.font.SysFont('arial', 36)
             if gameboard[i][j].is_locked:
                 largeText = pygame.font.SysFont('arial', 36, True)
-            TextSurf, TextRect = text_objects(num, largeText, colour)
+            TextSurf, TextRect = text_objects(num, largeText, (0, 0, 0), colour)
             TextRect.center = (center[0] + 30, center[1] + 30)
             gameDisplay.blit(TextSurf, TextRect)
         elif len(val) > 2:
@@ -566,9 +587,20 @@ if __name__ == '__main__':
                 offset = get_offset(k)
                 largeText = pygame.font.SysFont('arial',
                                              SMALLTEXTSIZE)
-                TextSurf, TextRect = text_objects(num, largeText, colour)
+                TextSurf, TextRect = text_objects(num, largeText,(0, 0, 0), colour)
                 TextRect.center = (center[0] + offset[0], center[1] + offset[1])
                 gameDisplay.blit(TextSurf, TextRect)
+        elif len(val) == 1:
+
+            largeText = pygame.font.SysFont('arial', 36)
+            if gameboard[i][j].is_locked:
+                largeText = pygame.font.SysFont('arial', 36, True)
+
+            TextSurf, TextRect = text_objects("0", largeText, (255, 255, 255),(255, 255, 255))
+
+            TextRect.center = (center[0] + 30, center[1] + 30)
+            gameDisplay.blit(TextSurf, TextRect)
+
 
     def draw_board():
         bold = False
@@ -637,7 +669,7 @@ if __name__ == '__main__':
         a = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         r = num // 9
         c = num % 9
-        while len(gameboard[r][c]) != 1:
+        while len(gameboard[r][c]) != 1 and r < 9 and c < 9:
             num += 1
             r = num // 9
             c = num % 9
@@ -657,8 +689,6 @@ if __name__ == '__main__':
             update_cells(c, r)
             pygame.display.update()
         return False
-
-
 
     # TextSurf, TextRect = text_objects('1', largeText)
     # TextRect.center = ((15), (15))
@@ -700,6 +730,17 @@ if __name__ == '__main__':
                 elif 590 <= event.pos[0] <= 690 and 250 <= event.pos[1] <= 310:
                     visual_solve2(0)
                     fill_selected_cells()
+                    draw_boundaries()
+                    draw_border()
+                    draw_board()
+                    pygame.display.update()
+                elif 590 <= event.pos[0] <= 690 and 160 <= event.pos[1] <= 220:
+                    print("update")
+                    print(gameboard)
+                    gameboard.clear()
+                    gameboard = Board([])
+                    print(gameboard)
+
                     draw_boundaries()
                     draw_border()
                     draw_board()
